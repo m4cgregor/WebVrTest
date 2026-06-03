@@ -1,0 +1,108 @@
+<style>
+  .panel-container {
+    align-items: center;
+    padding: 3;
+    width: 60;
+    display: flex;
+    flex-direction: column;
+    background-color: #0b0f19;
+    border-color: #1f2937;
+    border-width: 0.2;
+    border-radius: 4;
+  }
+
+  .screen {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .heading {
+    font-size: 4.5;
+    font-weight: bold;
+    color: #3b82f6; /* Blue accent */
+    text-align: center;
+    margin-bottom: 1;
+  }
+
+  .sub-heading {
+    font-size: 2.2;
+    color: #9ca3af;
+    text-align: center;
+    margin-top: 0.5;
+    margin-bottom: 2;
+  }
+
+  .hud-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+    margin-top: 1;
+    margin-bottom: 1;
+  }
+
+  .hud-item {
+    font-size: 3;
+    font-weight: bold;
+    color: #f3f4f6;
+  }
+
+  .life-critical {
+    color: #ef4444; /* Red accent */
+  }
+
+  .life-healthy {
+    color: #10b981; /* Green accent */
+  }
+
+  .btn {
+    width: 80%;
+    padding: 1.5;
+    background-color: #3b82f6;
+    color: #ffffff;
+    border-radius: 2;
+    border-width: 0.1;
+    border-color: #2563eb;
+    font-size: 2.5;
+    font-weight: medium;
+    text-align: center;
+    cursor: pointer;
+    margin-top: 1.5;
+  }
+
+  .btn-restart {
+    background-color: #ef4444;
+    border-color: #dc2626;
+  }
+</style>
+
+<div class="panel-container">
+  <!-- WELCOME SCREEN -->
+  <div id="welcome-screen" class="screen">
+    <span class="heading">MR SPATIAL DEFENDER</span>
+    <span class="sub-heading">¡Defiende tu habitación! Portales alienígenas aparecerán en tus paredes. Dispara con el gatillo de tu mando para destruir los drones antes de que te alcancen.</span>
+    <button id="start-button" class="btn">Empezar Juego</button>
+  </div>
+
+  <!-- HUD SCREEN -->
+  <div id="hud-screen" class="screen hidden">
+    <span class="heading">ESTADO DE COMBATE</span>
+    <div class="hud-row">
+      <span id="score-text" class="hud-item">PUNTOS: 0</span>
+      <span id="life-text" class="hud-item life-healthy">VIDA: 100%</span>
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="game-over-screen" class="screen hidden">
+    <span class="heading" style="color: #ef4444;">FIN DE PARTIDA</span>
+    <span id="final-score-text" class="sub-heading">Puntuación final: 0</span>
+    <button id="restart-button" class="btn btn-restart">Jugar de Nuevo</button>
+  </div>
+</div>
