@@ -86,7 +86,7 @@
   <!-- WELCOME SCREEN -->
   <div id="welcome-screen" class="screen">
     <span class="heading">MR SPATIAL DEFENDER</span>
-    <span class="sub-heading">¡Defiende tu habitación! Portales alienígenas aparecerán en tus paredes. Dispara con el gatillo de tu mando para destruir los drones antes de que te alcancen.</span>
+    <span class="sub-heading">Defiende tu habitacion! Portales alienigenas apareceran en tus paredes. Dispara con el gatillo de tu mando para destruir los drones antes de que te alcancen.</span>
     <button id="start-button" class="btn">Empezar Juego</button>
   </div>
 
@@ -102,7 +102,7 @@
   <!-- GAME OVER SCREEN -->
   <div id="game-over-screen" class="screen hidden">
     <span class="heading" style="color: #ef4444;">FIN DE PARTIDA</span>
-    <span id="final-score-text" class="sub-heading">Puntuación final: 0</span>
+    <span id="final-score-text" class="sub-heading">Puntuacion final: 0</span>
     <button id="restart-button" class="btn btn-restart">Jugar de Nuevo</button>
   </div>
 </div>

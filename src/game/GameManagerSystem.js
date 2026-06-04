@@ -108,7 +108,7 @@ export class GameManagerSystem extends createSystem({
         gameOverScreen?.setProperties({ class: 'screen' });
 
         if (finalScoreText) {
-          finalScoreText.setProperties({ text: `Puntuación final: ${score}` });
+          finalScoreText.setProperties({ text: `Puntuacion final: ${score}` });
         }
       }
     });
