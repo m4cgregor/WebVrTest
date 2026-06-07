@@ -154,24 +154,26 @@ export class PortalSystem extends createSystem({
       }
     }
 
-    // Si no hay portales activos y ha pasado el tiempo de espera, activamos el fallback
-    if (this.queries.portals.entities.length === 0 && !this.fallbackSpawned) {
+    // Si ha pasado el tiempo de espera, activamos el fallback si nos faltan portales para asegurar al menos 3
+    if (!this.fallbackSpawned) {
       this.fallbackTimer -= delta;
       if (this.fallbackTimer <= 0) {
         this.fallbackSpawned = true;
-        console.log('[PortalSystem] No physical walls detected after delay. Spawning virtual fallback portals.');
-        // Portal 1: Al frente
-        this.spawnPortalAt(new Vector3(0, 1.3, -2.2), new Quaternion());
-        // Portal 2: Izquierda-Frente
-        this.spawnPortalAt(
-          new Vector3(-1.5, 1.3, -1.5),
-          new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 4)
-        );
-        // Portal 3: Derecha-Frente
-        this.spawnPortalAt(
-          new Vector3(1.5, 1.3, -1.5),
-          new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), -Math.PI / 4)
-        );
+        const currentCount = this.queries.portals.entities.length;
+        if (currentCount < 3) {
+          const needed = 3 - currentCount;
+          console.log(`[PortalSystem] Only ${currentCount} portals active after delay. Spawning ${needed} fallback portals.`);
+          
+          const fallbacks = [
+            { pos: new Vector3(0, 1.3, -2.2), quat: new Quaternion() },
+            { pos: new Vector3(-1.5, 1.3, -1.5), quat: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 4) },
+            { pos: new Vector3(1.5, 1.3, -1.5), quat: new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), -Math.PI / 4) }
+          ];
+
+          for (let i = 0; i < needed; i++) {
+            this.spawnPortalAt(fallbacks[i].pos, fallbacks[i].quat);
+          }
+        }
       }
     }
 

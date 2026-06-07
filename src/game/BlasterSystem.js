@@ -69,6 +69,8 @@ export class BlasterSystem extends createSystem({
   }
 
   fireLaser(originPos, direction, quat, gmEntity) {
+    const laserGroup = new Group();
+
     // Crear el proyectil láser
     const laserMesh = new Mesh(
       new CylinderGeometry(0.01, 0.01, 0.3, 8),
@@ -76,8 +78,9 @@ export class BlasterSystem extends createSystem({
     );
     // Alinear con el vector forward (-Z)
     laserMesh.rotateX(Math.PI / 2);
+    laserGroup.add(laserMesh);
 
-    const laserEntity = this.world.createTransformEntity(laserMesh);
+    const laserEntity = this.world.createTransformEntity(laserGroup);
     // Spawnea ligeramente por delante del blaster
     const spawnPos = originPos.clone().addScaledVector(direction, 0.15);
     
