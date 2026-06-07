@@ -1,18 +1,16 @@
 <style>
-  /* El contenedor principal es transparente y abarca todo el ancho y alto del panel */
+  /* El contenedor principal es transparente y abarca todo el ancho del panel */
   .panel-container {
     width: 100%;
-    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     background-color: transparent;
   }
 
   /* Las pantallas de inicio y fin (Welcome / Game Over) tienen fondo sólido y bordes */
   .card-screen {
-    width: 60;
+    width: 25; /* 25% de 3.6m = 0.9m (ancho original perfecto) */
     align-items: center;
     padding: 3;
     display: flex;
@@ -25,20 +23,9 @@
 
   .screen {
     width: 100%;
-    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-  }
-
-  .hud-screen {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
   }
 
   .hidden {
@@ -69,7 +56,6 @@
     width: 100%;
     padding-left: 5;
     padding-right: 5;
-    margin-top: 2; /* Separación desde el borde superior */
   }
 
   /* Cada bloque individual del HUD (Score y Life) es una pequeña tarjeta sólida */
@@ -123,7 +109,7 @@
   </div>
 
   <!-- HUD SCREEN (DIVIDIDO A LA IZQUIERDA Y DERECHA) -->
-  <div id="hud-screen" class="hud-screen hidden">
+  <div id="hud-screen" class="screen hidden">
     <div class="hud-split-container">
       <!-- Bloque Izquierdo: Puntos -->
       <div class="hud-card">

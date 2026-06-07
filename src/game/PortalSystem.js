@@ -318,9 +318,9 @@ export class PortalSystem extends createSystem({
         portalObj.getWorldPosition(portalPos);
         portalObj.getWorldQuaternion(portalQuat);
 
-        // Centrado exactamente con el portal, ligeramente hacia adelante (+0.02m) para evitar z-fighting
+        // Posicionado arriba (+0.8m) y centrado con el portal, ligeramente hacia adelante (+0.02m) para evitar z-fighting
         const hudPos = portalPos.clone().add(
-          new Vector3(0, 0, 0.02).applyQuaternion(portalQuat)
+          new Vector3(0, 0.8, 0.02).applyQuaternion(portalQuat)
         );
         hudEntity.object3D.position.copy(hudPos);
         hudEntity.object3D.quaternion.copy(portalQuat);
