@@ -16,30 +16,36 @@ export class GameManagerSystem extends createSystem({
 }) {
   init() {
     this.doc = null;
+    this.eventsBound = false;
+  }
 
-    this.queries.hudPanel.subscribe('qualify', (panelEntity) => {
-      const doc = panelEntity.getValue(PanelDocument, 'document');
-      if (!doc) return;
-      this.doc = doc;
+  bindUIEvents(doc) {
+    if (this.eventsBound) return;
+    this.eventsBound = true;
+    console.log('[GameManagerSystem] bindUIEvents called! Available IDs in doc:', Array.from(doc.elementMap.keys()));
 
-      const startBtn = doc.getElementById('start-button');
-      const restartBtn = doc.getElementById('restart-button');
+    const startBtn = doc.getElementById('start-button');
+    const restartBtn = doc.getElementById('restart-button');
 
-      if (startBtn) {
-        startBtn.addEventListener('click', () => {
-          this.startGame();
-        });
-      }
+    if (startBtn) {
+      startBtn.name = 'start-button';
+      console.log('[GameManagerSystem] startBtn UUID:', startBtn.uuid);
+      startBtn.addEventListener('click', () => {
+        console.log('[GameManagerSystem] Start button clicked!');
+        this.startGame();
+      });
+    }
 
-      if (restartBtn) {
-        restartBtn.addEventListener('click', () => {
-          this.startGame();
-        });
-      }
+    if (restartBtn) {
+      restartBtn.name = 'restart-button';
+      restartBtn.addEventListener('click', () => {
+        console.log('[GameManagerSystem] Restart button clicked!');
+        this.startGame();
+      });
+    }
 
-      // Sincronizar UI inicial
-      this.updateUI();
-    });
+    // Sincronizar UI inicial
+    this.updateUI();
   }
 
   startGame() {
@@ -51,7 +57,11 @@ export class GameManagerSystem extends createSystem({
 
     // Entrar en Realidad Mixta (XR) automáticamente
     if (this.world.visibilityState.value === VisibilityState.NonImmersive) {
-      this.world.launchXR();
+      try {
+        this.world.launchXR();
+      } catch (err) {
+        console.warn('[GameManagerSystem] Failed to launch XR (user gesture required):', err);
+      }
     }
 
     this.updateUI();
@@ -81,14 +91,14 @@ export class GameManagerSystem extends createSystem({
 
       if (state === 0) {
         // Welcome Screen
-        welcomeScreen?.setProperties({ class: 'screen' });
-        hudScreen?.setProperties({ class: 'screen hidden' });
-        gameOverScreen?.setProperties({ class: 'screen hidden' });
+        welcomeScreen?.setProperties({ display: 'flex' });
+        hudScreen?.setProperties({ display: 'none' });
+        gameOverScreen?.setProperties({ display: 'none' });
       } else if (state === 1) {
         // Playing
-        welcomeScreen?.setProperties({ class: 'screen hidden' });
-        hudScreen?.setProperties({ class: 'screen' });
-        gameOverScreen?.setProperties({ class: 'screen hidden' });
+        welcomeScreen?.setProperties({ display: 'none' });
+        hudScreen?.setProperties({ display: 'flex' });
+        gameOverScreen?.setProperties({ display: 'none' });
 
         if (scoreText) {
           scoreText.setProperties({ text: `PUNTOS: ${score}` });
@@ -96,16 +106,16 @@ export class GameManagerSystem extends createSystem({
         if (lifeText) {
           lifeText.setProperties({ text: `VIDA: ${life}%` });
           if (life < 30) {
-            lifeText.setProperties({ class: 'hud-item life-critical' });
+            lifeText.setProperties({ color: '#ef4444' });
           } else {
-            lifeText.setProperties({ class: 'hud-item life-healthy' });
+            lifeText.setProperties({ color: '#10b981' });
           }
         }
       } else if (state === 2) {
         // Game Over
-        welcomeScreen?.setProperties({ class: 'screen hidden' });
-        hudScreen?.setProperties({ class: 'screen hidden' });
-        gameOverScreen?.setProperties({ class: 'screen' });
+        welcomeScreen?.setProperties({ display: 'none' });
+        hudScreen?.setProperties({ display: 'none' });
+        gameOverScreen?.setProperties({ display: 'flex' });
 
         if (finalScoreText) {
           finalScoreText.setProperties({ text: `Puntuacion final: ${score}` });
@@ -115,6 +125,17 @@ export class GameManagerSystem extends createSystem({
   }
 
   update() {
+    // Si la UI aún no ha cargado, intentamos resolver el documento dinámicamente
+    if (!this.doc) {
+      this.queries.hudPanel.entities.forEach((panelEntity) => {
+        const doc = panelEntity.getValue(PanelDocument, 'document');
+        if (doc) {
+          this.doc = doc;
+          this.bindUIEvents(doc);
+        }
+      });
+    }
+
     // Mantener la UI actualizada en cada frame si estamos jugando
     this.updateUI();
   }
