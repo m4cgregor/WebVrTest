@@ -22,7 +22,7 @@
             "sourceTag": "span",
             "type": "custom",
             "children": [
-              "¡Defiende tu habitación! Portales alienígenas aparecerán en tus paredes. Dispara con el gatillo de tu mando para destruir los drones antes de que te alcancen."
+              "Defiende tu habitacion! Portales alienigenas apareceran en tus paredes. Dispara con el gatillo de tu mando para destruir los drones antes de que te alcancen."
             ],
             "properties": {
               "class": "sub-heading"
@@ -126,7 +126,7 @@
             "sourceTag": "span",
             "type": "custom",
             "children": [
-              "Puntuación final: 0"
+              "Puntuacion final: 0"
             ],
             "properties": {
               "id": "final-score-text",
@@ -402,7 +402,7 @@
       },
       "end": {
         "line": 88,
-        "column": 195
+        "column": 194
       }
     },
     "uid-5": {
