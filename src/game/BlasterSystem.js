@@ -125,7 +125,7 @@ export class BlasterSystem extends createSystem({
       const raySpace = this.player.raySpaces[hand];
       const blasterEntity = hand === 'left' ? this.leftBlasterEntity : this.rightBlasterEntity;
 
-      const connected = gp && gp.connected;
+      const connected = !!(gp && gp.gamepad);
 
       if (connected) {
         blasterEntity.object3D.visible = true;

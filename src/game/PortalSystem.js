@@ -18,25 +18,16 @@ export class PortalSystem extends createSystem({
 }) {
   init() {
     this.spawnInterval = 5.0; // segundos entre spawn
-    this.fallbackSpawned = false;
+    this.sessionPortalsInitialized = false;
 
-    // Suscribirse a planos de Realidad Mixta detectados en la habitación
+    // Suscribirse a planos de Realidad Mixta detectados en la habitación mientras jugamos
     this.queries.planes.subscribe('qualify', (planeEntity) => {
+      if (!this.isPlaying()) return; // Solo spawnear si estamos jugando
+      
       const rawPlane = planeEntity.getValue(XRPlane, '_plane');
       if (rawPlane && rawPlane.orientation === 'vertical') {
-        // Es una pared física! Creamos un portal en su posición
-        // Evitar solapar demasiados portales (máximo 4)
         if (this.queries.portals.entities.length < 4) {
-          const pos = new Vector3();
-          const quat = new Quaternion();
-          planeEntity.object3D.getWorldPosition(pos);
-          planeEntity.object3D.getWorldQuaternion(quat);
-
-          // Ajustar posición un poco hacia adelante de la pared para evitar z-fighting
-          const forward = new Vector3(0, 0, 0.1).applyQuaternion(quat);
-          pos.add(forward);
-
-          this.spawnPortalAt(pos, quat);
+          this.spawnPortalOnPlane(planeEntity);
         }
       }
     });
@@ -50,6 +41,19 @@ export class PortalSystem extends createSystem({
       }
     });
     return playing;
+  }
+
+  spawnPortalOnPlane(planeEntity) {
+    const pos = new Vector3();
+    const quat = new Quaternion();
+    planeEntity.object3D.getWorldPosition(pos);
+    planeEntity.object3D.getWorldQuaternion(quat);
+
+    // Ajustar posición un poco hacia adelante de la pared para evitar z-fighting
+    const forward = new Vector3(0, 0, 0.1).applyQuaternion(quat);
+    pos.add(forward);
+
+    this.spawnPortalAt(pos, quat);
   }
 
   spawnPortalAt(position, quaternion) {
@@ -110,41 +114,54 @@ export class PortalSystem extends createSystem({
     this.queries.portals.entities.forEach((entity) => {
       entity.dispose();
     });
-    this.fallbackSpawned = false;
+    this.sessionPortalsInitialized = false;
   }
 
   update(delta) {
     const playing = this.isPlaying();
 
     if (!playing) {
-      this.cleanupPortals();
+      if (this.sessionPortalsInitialized || this.queries.portals.entities.length > 0) {
+        this.cleanupPortals();
+      }
       return;
     }
 
-    // Comprobamos si hay paredes físicas detectadas
-    let hasVerticalPlanes = false;
-    this.queries.planes.entities.forEach((planeEntity) => {
-      const rawPlane = planeEntity.getValue(XRPlane, '_plane');
-      if (rawPlane && rawPlane.orientation === 'vertical') {
-        hasVerticalPlanes = true;
-      }
-    });
+    // Inicializar portales para la sesión si aún no lo hemos hecho
+    if (!this.sessionPortalsInitialized) {
+      this.sessionPortalsInitialized = true;
+      
+      // Comprobar si hay paredes físicas ya detectadas
+      const verticalPlanes = [];
+      this.queries.planes.entities.forEach((planeEntity) => {
+        const rawPlane = planeEntity.getValue(XRPlane, '_plane');
+        if (rawPlane && rawPlane.orientation === 'vertical') {
+          verticalPlanes.push(planeEntity);
+        }
+      });
 
-    // Modo Fallback: Si no hay paredes físicas reales (ej. en emulador), spawnear 3 portales virtuales
-    if (!hasVerticalPlanes && this.queries.portals.entities.length === 0 && !this.fallbackSpawned) {
-      this.fallbackSpawned = true;
-      // Portal 1: Al frente
-      this.spawnPortalAt(new Vector3(0, 1.3, -2.2), new Quaternion());
-      // Portal 2: Izquierda-Frente
-      this.spawnPortalAt(
-        new Vector3(-1.5, 1.3, -1.5),
-        new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 4)
-      );
-      // Portal 3: Derecha-Frente
-      this.spawnPortalAt(
-        new Vector3(1.5, 1.3, -1.5),
-        new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), -Math.PI / 4)
-      );
+      if (verticalPlanes.length > 0) {
+        // Spawnear portales en las paredes físicas detectadas (máximo 4)
+        const count = Math.min(verticalPlanes.length, 4);
+        for (let i = 0; i < count; i++) {
+          this.spawnPortalOnPlane(verticalPlanes[i]);
+        }
+      } else {
+        // Modo Fallback: no hay paredes físicas detectadas, spawnear 3 portales virtuales al frente
+        console.log('[PortalSystem] No physical walls detected. Spawning virtual fallback portals.');
+        // Portal 1: Al frente
+        this.spawnPortalAt(new Vector3(0, 1.3, -2.2), new Quaternion());
+        // Portal 2: Izquierda-Frente
+        this.spawnPortalAt(
+          new Vector3(-1.5, 1.3, -1.5),
+          new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 4)
+        );
+        // Portal 3: Derecha-Frente
+        this.spawnPortalAt(
+          new Vector3(1.5, 1.3, -1.5),
+          new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), -Math.PI / 4)
+        );
+      }
     }
 
     // Gestionar el spawn de drones desde cada portal activo
