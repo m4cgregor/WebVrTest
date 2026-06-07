@@ -76,8 +76,8 @@ World.create(document.getElementById('scene-container'), {
     .createTransformEntity()
     .addComponent(PanelUI, {
       config: './ui/game_hud.json',
-      maxHeight: 0.5,
-      maxWidth: 0.9
+      maxHeight: 0.6,
+      maxWidth: 2.8
     })
     .addComponent(Interactable)
     .addComponent(ScreenSpace, {
@@ -86,9 +86,9 @@ World.create(document.getElementById('scene-container'), {
       height: '40%'
     });
 
-  // Colocar el HUD más arriba y rotado hacia abajo para no estorbar en el combate
-  hudEntity.object3D.position.set(0, 1.8, -1.5);
-  hudEntity.object3D.rotation.x = 0.3;
+  // Colocar el HUD centrado y a altura de los ojos por defecto
+  hudEntity.object3D.position.set(0, 1.3, -1.8);
+  hudEntity.object3D.rotation.set(0, 0, 0);
 
   // 3. Registrar todos los sistemas de juego en el ECS
   world

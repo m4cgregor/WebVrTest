@@ -62,11 +62,37 @@ export class PortalSystem extends createSystem({
     const extraRotation = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2);
     const quat = planeQuat.clone().multiply(extraRotation);
 
-    // Ajustar posición del portal 0.5m a la izquierda de la pared
-    const portalPos = pos.clone().add(
-      new Vector3(-0.5, 0, 0.1).applyQuaternion(quat)
-    );
+    // Obtener la mirada horizontal del jugador para centrar el portal frente a él
+    const headPos = new Vector3();
+    const headQuat = new Quaternion();
+    this.player.head.getWorldPosition(headPos);
+    this.player.head.getWorldQuaternion(headQuat);
+
+    const forward = new Vector3(0, 0, -1).applyQuaternion(headQuat).normalize();
+    forward.y = 0;
+    forward.normalize();
+
+    // El plano pasa por 'pos' y su normal es el eje Y local del plano
+    const N = new Vector3(0, 1, 0).applyQuaternion(planeQuat).normalize();
+    const dot = forward.dot(N);
+
+    const portalPos = new Vector3();
+    if (Math.abs(dot) > 0.05) {
+      // Intersección del rayo del jugador con el plano vertical
+      const t = (pos.clone().sub(headPos).dot(N)) / dot;
+      if (t > 0 && t < 10) {
+        portalPos.copy(headPos).addScaledVector(forward, t);
+      } else {
+        portalPos.copy(pos);
+      }
+    } else {
+      portalPos.copy(pos);
+    }
+
     portalPos.y = 1.3; // Altura fija cómoda de 1.3m
+    
+    // Separar ligeramente de la pared (0.05m hacia afuera)
+    portalPos.addScaledVector(N, 0.05);
 
     this.spawnPortalAt(portalPos, quat);
   }
@@ -90,14 +116,14 @@ export class PortalSystem extends createSystem({
     portalGroup.add(ring);
     portalGroup.add(disc);
 
-    // 3. Túnel 3D del espacio (Tubo que se extiende hacia adentro de la pared, 3 metros de profundidad)
+    // 3. Túnel 3D del espacio (Tubo que se extiende hacia adentro de la pared, 4 metros de profundidad)
     // side: 1 equivale a BackSide para renderizar el interior del cilindro
     const tunnel = new Mesh(
-      new CylinderGeometry(0.78, 0.78, 3.0, 16, 1, true),
+      new CylinderGeometry(0.78, 0.78, 4.0, 16, 1, true),
       new MeshBasicMaterial({ color: 0x070a13, side: 1 })
     );
     tunnel.rotateX(Math.PI / 2);
-    tunnel.position.set(0, 0, -1.5); // Centrado a 1.5m detrás del portal
+    tunnel.position.set(0, 0, -2.0); // Centrado a 2.0m detrás del portal
     portalGroup.add(tunnel);
 
     // 4. Anillos luminosos de profundidad dentro del túnel (efecto de paralaje 3D)
@@ -107,8 +133,8 @@ export class PortalSystem extends createSystem({
         new TorusGeometry(0.76, 0.02, 8, 24),
         new MeshBasicMaterial({ color: ringColors[i] })
       );
-      // Colocar a profundidades de 0.75m, 1.5m y 2.25m
-      depthRing.position.set(0, 0, -0.75 * (i + 1));
+      // Colocar a profundidades de 1.0m, 2.0m y 3.0m
+      depthRing.position.set(0, 0, -1.0 * (i + 1));
       portalGroup.add(depthRing);
     }
 
@@ -156,8 +182,8 @@ export class PortalSystem extends createSystem({
 
     // Retornar el HUD al centro de la vista al terminar la partida o ir a la bienvenida
     this.queries.hudPanel.entities.forEach((hudEntity) => {
-      hudEntity.object3D.position.set(0, 1.8, -1.5);
-      hudEntity.object3D.rotation.set(0.3, 0, 0);
+      hudEntity.object3D.position.set(0, 1.3, -1.8);
+      hudEntity.object3D.rotation.set(0, 0, 0);
     });
   }
 
@@ -240,12 +266,8 @@ export class PortalSystem extends createSystem({
         forward.y = 0;
         forward.normalize();
 
-        const right = new Vector3().crossVectors(forward, new Vector3(0, 1, 0)).normalize();
-
-        // Posicionar a 2.2m enfrente, desplazado 0.5m a la izquierda
-        const portalPos = headPos.clone()
-          .addScaledVector(forward, 2.2)
-          .addScaledVector(right, -0.5);
+        // Posicionar a 2.2m exactamente enfrente (en el centro)
+        const portalPos = headPos.clone().addScaledVector(forward, 2.2);
         portalPos.y = 1.3;
 
         // Rotación orientada hacia el jugador (lookAt horizontal)
@@ -257,7 +279,7 @@ export class PortalSystem extends createSystem({
       }
     }
 
-    // Mantener el HUD a la derecha del portal activo mientras jugamos
+    // Mantener el HUD perfectamente alineado y coplanar al portal activo (los extremos de la UI quedarán a izquierda y derecha)
     this.queries.portals.entities.forEach((portalEntity) => {
       this.queries.hudPanel.entities.forEach((hudEntity) => {
         // Forzar actualización de matrices en Three.js para obtener las transformadas de mundo exactas
@@ -269,17 +291,12 @@ export class PortalSystem extends createSystem({
         portalObj.getWorldPosition(portalPos);
         portalObj.getWorldQuaternion(portalQuat);
 
-        // A la derecha (+1.1m en X local del portal), un poco más arriba (+0.1m) y ligeramente más cerca en Z
+        // Centrado exactamente con el portal, ligeramente hacia adelante (+0.02m) para evitar z-fighting
         const hudPos = portalPos.clone().add(
-          new Vector3(1.1, 0.1, 0.15).applyQuaternion(portalQuat)
+          new Vector3(0, 0, 0.02).applyQuaternion(portalQuat)
         );
         hudEntity.object3D.position.copy(hudPos);
-
-        // Misma rotación del portal pero inclinada levemente hacia abajo
-        const hudQuat = portalQuat.clone().multiply(
-          new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), 0.2)
-        );
-        hudEntity.object3D.quaternion.copy(hudQuat);
+        hudEntity.object3D.quaternion.copy(portalQuat);
       });
     });
 
@@ -299,8 +316,8 @@ export class PortalSystem extends createSystem({
         const quat = new Quaternion();
         portalEntity.object3D.getWorldQuaternion(quat);
 
-        // Spawnea el drone al fondo del túnel (-3.0 metros en Z local del portal)
-        const tunnelBottom = new Vector3(0, 0, -3.0).applyQuaternion(quat);
+        // Spawnea el drone al fondo del túnel (-4.0 metros en Z local del portal)
+        const tunnelBottom = new Vector3(0, 0, -4.0).applyQuaternion(quat);
         pos.add(tunnelBottom);
 
         this.spawnDroneAt(pos);
