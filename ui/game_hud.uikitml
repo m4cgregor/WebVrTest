@@ -1,10 +1,12 @@
 <style>
-  /* El contenedor principal es transparente y abarca todo el ancho del panel */
+  /* El contenedor principal es transparente y abarca todo el ancho y alto del panel */
   .panel-container {
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     background-color: transparent;
   }
 
@@ -23,9 +25,20 @@
 
   .screen {
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+  }
+
+  .hud-screen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
   }
 
   .hidden {
@@ -56,11 +69,12 @@
     width: 100%;
     padding-left: 5;
     padding-right: 5;
+    margin-top: 2; /* Separación desde el borde superior */
   }
 
   /* Cada bloque individual del HUD (Score y Life) es una pequeña tarjeta sólida */
   .hud-card {
-    width: 30;
+    width: 22; /* Más pequeño para separar del portal */
     padding: 2;
     background-color: #0b0f19;
     border-color: #1f2937;
@@ -109,7 +123,7 @@
   </div>
 
   <!-- HUD SCREEN (DIVIDIDO A LA IZQUIERDA Y DERECHA) -->
-  <div id="hud-screen" class="screen hidden">
+  <div id="hud-screen" class="hud-screen hidden">
     <div class="hud-split-container">
       <!-- Bloque Izquierdo: Puntos -->
       <div class="hud-card">

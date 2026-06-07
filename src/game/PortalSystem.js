@@ -9,7 +9,11 @@ import {
   Quaternion,
   XRPlane,
   PanelUI,
-  PanelDocument
+  PanelDocument,
+  BufferGeometry,
+  BufferAttribute,
+  Points,
+  PointsMaterial
 } from '@iwsdk/core';
 import { GameManager, Portal, Drone } from './components.js';
 
@@ -112,6 +116,7 @@ export class PortalSystem extends createSystem({
       new MeshBasicMaterial({ color: 0x1d4ed8, transparent: true, opacity: 0.5 })
     );
     disc.rotateX(Math.PI / 2);
+    disc.name = 'energyDisc';
 
     portalGroup.add(ring);
     portalGroup.add(disc);
@@ -137,6 +142,28 @@ export class PortalSystem extends createSystem({
       depthRing.position.set(0, 0, -1.0 * (i + 1));
       portalGroup.add(depthRing);
     }
+
+    // 5. Campo de estrellas (starfield) dentro del túnel (Estrellas 3D con atenuación de tamaño)
+    const starsGeometry = new BufferGeometry();
+    const starsCount = 100;
+    const positions = new Float32Array(starsCount * 3);
+    for (let i = 0; i < starsCount; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const r = Math.random() * 0.76;
+      positions[i * 3] = Math.cos(theta) * r;
+      positions[i * 3 + 1] = Math.sin(theta) * r;
+      positions[i * 3 + 2] = -Math.random() * 4.0;
+    }
+    starsGeometry.setAttribute('position', new BufferAttribute(positions, 3));
+    const starsMaterial = new PointsMaterial({
+      color: 0xffffff,
+      size: 0.03,
+      transparent: true,
+      opacity: 0.9,
+      sizeAttenuation: true
+    });
+    const starfield = new Points(starsGeometry, starsMaterial);
+    portalGroup.add(starfield);
 
     portalGroup.position.copy(position);
     portalGroup.quaternion.copy(quaternion);
@@ -326,7 +353,10 @@ export class PortalSystem extends createSystem({
       portalEntity.setValue(Portal, 'spawnTimer', timer);
       
       // Animación suave de rotación del disco de energía
-      portalEntity.object3D.rotateZ(delta * 0.5);
+      const disc = portalEntity.object3D.getObjectByName('energyDisc');
+      if (disc) {
+        disc.rotateY(delta * 0.5); // El disco gira sobre su eje de simetría
+      }
     });
   }
 }
