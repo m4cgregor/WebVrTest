@@ -9,8 +9,7 @@ import {
   Quaternion,
   XRPlane,
   PanelUI,
-  PanelDocument,
-  eq
+  PanelDocument
 } from '@iwsdk/core';
 import { GameManager, Portal, Drone } from './components.js';
 
@@ -18,10 +17,7 @@ export class PortalSystem extends createSystem({
   gameManager: { required: [GameManager] },
   portals: { required: [Portal] },
   planes: { required: [XRPlane] },
-  hudPanel: {
-    required: [PanelUI, PanelDocument],
-    where: [eq(PanelUI, 'config', './ui/game_hud.json')]
-  }
+  hudPanel: { required: [PanelUI, PanelDocument] }
 }) {
   init() {
     this.spawnInterval = 3.0; // segundos entre spawn (más rápido con 1 solo portal)
@@ -56,6 +52,9 @@ export class PortalSystem extends createSystem({
   spawnPortalOnPlane(planeEntity) {
     const pos = new Vector3();
     const planeQuat = new Quaternion();
+    
+    // Forzar actualización para obtener valores del mundo exactos
+    planeEntity.object3D.updateMatrixWorld(true);
     planeEntity.object3D.getWorldPosition(pos);
     planeEntity.object3D.getWorldQuaternion(planeQuat);
 
@@ -63,11 +62,13 @@ export class PortalSystem extends createSystem({
     const extraRotation = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2);
     const quat = planeQuat.clone().multiply(extraRotation);
 
-    // Ajustar posición un poco hacia adelante de la pared para evitar z-fighting
-    const forward = new Vector3(0, 0, 0.1).applyQuaternion(quat);
-    pos.add(forward);
+    // Ajustar posición del portal 0.5m a la izquierda de la pared
+    const portalPos = pos.clone().add(
+      new Vector3(-0.5, 0, 0.1).applyQuaternion(quat)
+    );
+    portalPos.y = 1.3; // Altura fija cómoda de 1.3m
 
-    this.spawnPortalAt(pos, quat);
+    this.spawnPortalAt(portalPos, quat);
   }
 
   spawnPortalAt(position, quaternion) {
@@ -192,14 +193,19 @@ export class PortalSystem extends createSystem({
         this.player.head.getWorldPosition(headPos);
         this.player.head.getWorldQuaternion(headQuat);
         const forward = new Vector3(0, 0, -1).applyQuaternion(headQuat).normalize();
+        forward.y = 0;
+        forward.normalize();
 
-        let bestPlane = verticalPlanes[0];
+        let bestPlane = null;
         let maxDot = -Infinity;
 
         const planePos = new Vector3();
         verticalPlanes.forEach((plane) => {
+          plane.object3D.updateMatrixWorld(true);
           plane.object3D.getWorldPosition(planePos);
           const dirToPlane = planePos.clone().sub(headPos).normalize();
+          dirToPlane.y = 0;
+          dirToPlane.normalize();
           const dot = dirToPlane.dot(forward);
           if (dot > maxDot) {
             maxDot = dot;
@@ -207,8 +213,12 @@ export class PortalSystem extends createSystem({
           }
         });
 
-        // Spawnear solo 1 portal en la mejor pared física
-        this.spawnPortalOnPlane(bestPlane);
+        // Solo usar la pared física si está en un rango de 60 grados enfrente (dot > 0.5)
+        if (bestPlane && maxDot > 0.5) {
+          console.log('[PortalSystem] Detected wall in front. Spawning portal and HUD on it.');
+          this.spawnPortalOnPlane(bestPlane);
+          this.fallbackSpawned = true; // no necesitamos fallback
+        }
       }
     }
 
@@ -230,12 +240,13 @@ export class PortalSystem extends createSystem({
         forward.y = 0;
         forward.normalize();
 
-        // Posicionar a 2.2m enfrente a una altura cómoda de 1.3m
-        const portalPos = new Vector3(
-          headPos.x + forward.x * 2.2,
-          1.3,
-          headPos.z + forward.z * 2.2
-        );
+        const right = new Vector3().crossVectors(forward, new Vector3(0, 1, 0)).normalize();
+
+        // Posicionar a 2.2m enfrente, desplazado 0.5m a la izquierda
+        const portalPos = headPos.clone()
+          .addScaledVector(forward, 2.2)
+          .addScaledVector(right, -0.5);
+        portalPos.y = 1.3;
 
         // Rotación orientada hacia el jugador (lookAt horizontal)
         const tempGroup = new Group();
@@ -246,24 +257,27 @@ export class PortalSystem extends createSystem({
       }
     }
 
-    // Mantener el HUD a la izquierda del portal activo mientras jugamos
+    // Mantener el HUD a la derecha del portal activo mientras jugamos
     this.queries.portals.entities.forEach((portalEntity) => {
       this.queries.hudPanel.entities.forEach((hudEntity) => {
+        // Forzar actualización de matrices en Three.js para obtener las transformadas de mundo exactas
+        portalEntity.object3D.updateMatrixWorld(true);
+        
         const portalObj = portalEntity.object3D;
         const portalPos = new Vector3();
         const portalQuat = new Quaternion();
         portalObj.getWorldPosition(portalPos);
         portalObj.getWorldQuaternion(portalQuat);
 
-        // A la izquierda (-X local), un poco más arriba (+Y) y ligeramente más cerca en Z
+        // A la derecha (+1.1m en X local del portal), un poco más arriba (+0.1m) y ligeramente más cerca en Z
         const hudPos = portalPos.clone().add(
-          new Vector3(-1.1, 0.4, 0.15).applyQuaternion(portalQuat)
+          new Vector3(1.1, 0.1, 0.15).applyQuaternion(portalQuat)
         );
         hudEntity.object3D.position.copy(hudPos);
 
         // Misma rotación del portal pero inclinada levemente hacia abajo
         const hudQuat = portalQuat.clone().multiply(
-          new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), 0.25)
+          new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), 0.2)
         );
         hudEntity.object3D.quaternion.copy(hudQuat);
       });
@@ -276,10 +290,17 @@ export class PortalSystem extends createSystem({
 
       if (timer >= this.spawnInterval) {
         timer = 0;
+        
+        // Forzar actualización de matrices en Three.js para obtener las transformadas de mundo exactas
+        portalEntity.object3D.updateMatrixWorld(true);
+        
         const pos = new Vector3();
         portalEntity.object3D.getWorldPosition(pos);
+        const quat = new Quaternion();
+        portalEntity.object3D.getWorldQuaternion(quat);
+
         // Spawnea el drone al fondo del túnel (-3.0 metros en Z local del portal)
-        const tunnelBottom = new Vector3(0, 0, -3.0).applyQuaternion(portalEntity.object3D.quaternion);
+        const tunnelBottom = new Vector3(0, 0, -3.0).applyQuaternion(quat);
         pos.add(tunnelBottom);
 
         this.spawnDroneAt(pos);
