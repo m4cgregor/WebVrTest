@@ -19,6 +19,8 @@ export class PortalSystem extends createSystem({
   init() {
     this.spawnInterval = 5.0; // segundos entre spawn
     this.sessionPortalsInitialized = false;
+    this.fallbackTimer = 0.0;
+    this.fallbackSpawned = false;
 
     // Suscribirse a planos de Realidad Mixta detectados en la habitación mientras jugamos
     this.queries.planes.subscribe('qualify', (planeEntity) => {
@@ -115,6 +117,7 @@ export class PortalSystem extends createSystem({
       entity.dispose();
     });
     this.sessionPortalsInitialized = false;
+    this.fallbackSpawned = false;
   }
 
   update(delta) {
@@ -130,6 +133,8 @@ export class PortalSystem extends createSystem({
     // Inicializar portales para la sesión si aún no lo hemos hecho
     if (!this.sessionPortalsInitialized) {
       this.sessionPortalsInitialized = true;
+      this.fallbackTimer = 3.0; // esperar 3 segundos a que se detecten paredes físicas
+      this.fallbackSpawned = false;
       
       // Comprobar si hay paredes físicas ya detectadas
       const verticalPlanes = [];
@@ -146,9 +151,15 @@ export class PortalSystem extends createSystem({
         for (let i = 0; i < count; i++) {
           this.spawnPortalOnPlane(verticalPlanes[i]);
         }
-      } else {
-        // Modo Fallback: no hay paredes físicas detectadas, spawnear 3 portales virtuales al frente
-        console.log('[PortalSystem] No physical walls detected. Spawning virtual fallback portals.');
+      }
+    }
+
+    // Si no hay portales activos y ha pasado el tiempo de espera, activamos el fallback
+    if (this.queries.portals.entities.length === 0 && !this.fallbackSpawned) {
+      this.fallbackTimer -= delta;
+      if (this.fallbackTimer <= 0) {
+        this.fallbackSpawned = true;
+        console.log('[PortalSystem] No physical walls detected after delay. Spawning virtual fallback portals.');
         // Portal 1: Al frente
         this.spawnPortalAt(new Vector3(0, 1.3, -2.2), new Quaternion());
         // Portal 2: Izquierda-Frente
