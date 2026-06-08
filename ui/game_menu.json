@@ -1,0 +1,395 @@
+{
+  "element": {
+    "type": "container",
+    "sourceTag": "div",
+    "children": [
+      {
+        "type": "container",
+        "sourceTag": "div",
+        "children": [
+          {
+            "type": "container",
+            "sourceTag": "div",
+            "children": [
+              {
+                "sourceTag": "span",
+                "type": "custom",
+                "children": [
+                  "MR SPATIAL DEFENDER"
+                ],
+                "properties": {
+                  "class": "heading"
+                },
+                "dataUid": "uid-4"
+              },
+              {
+                "sourceTag": "span",
+                "type": "custom",
+                "children": [
+                  "Defiende tu habitacion! Un portal alienigena aparecera en el centro. Dispara con el gatillo de tu mando para destruir los drones antes de que te alcancen."
+                ],
+                "properties": {
+                  "class": "sub-heading"
+                },
+                "dataUid": "uid-5"
+              },
+              {
+                "sourceTag": "button",
+                "type": "custom",
+                "children": [
+                  "Empezar Juego"
+                ],
+                "properties": {
+                  "id": "start-button",
+                  "class": "btn"
+                },
+                "dataUid": "uid-6"
+              }
+            ],
+            "properties": {
+              "class": "card-screen"
+            },
+            "dataUid": "uid-3"
+          }
+        ],
+        "properties": {
+          "id": "welcome-screen",
+          "class": "screen"
+        },
+        "dataUid": "uid-2"
+      },
+      {
+        "type": "container",
+        "sourceTag": "div",
+        "children": [
+          {
+            "type": "container",
+            "sourceTag": "div",
+            "children": [
+              {
+                "sourceTag": "span",
+                "type": "custom",
+                "children": [
+                  "FIN DE PARTIDA"
+                ],
+                "properties": {
+                  "class": "heading",
+                  "style": {
+                    "color": "#ef4444"
+                  }
+                },
+                "dataUid": "uid-9"
+              },
+              {
+                "sourceTag": "span",
+                "type": "custom",
+                "children": [
+                  "Puntuacion final: 0"
+                ],
+                "properties": {
+                  "id": "final-score-text",
+                  "class": "sub-heading"
+                },
+                "dataUid": "uid-10"
+              },
+              {
+                "sourceTag": "button",
+                "type": "custom",
+                "children": [
+                  "Jugar de Nuevo"
+                ],
+                "properties": {
+                  "id": "restart-button",
+                  "class": "btn btn-restart"
+                },
+                "dataUid": "uid-11"
+              }
+            ],
+            "properties": {
+              "class": "card-screen"
+            },
+            "dataUid": "uid-8"
+          }
+        ],
+        "properties": {
+          "id": "game-over-screen",
+          "class": "screen hidden"
+        },
+        "dataUid": "uid-7"
+      }
+    ],
+    "properties": {
+      "class": "panel-container"
+    },
+    "dataUid": "uid-1"
+  },
+  "classes": {
+    "panel-container": {
+      "content": {
+        "width": "100%",
+        "display": "flex",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "backgroundColor": "transparent"
+      }
+    },
+    "card-screen": {
+      "content": {
+        "width": "90%",
+        "alignItems": "center",
+        "padding": "3",
+        "display": "flex",
+        "flexDirection": "column",
+        "backgroundColor": "#0b0f19",
+        "borderColor": "#1f2937",
+        "borderWidth": "0.2",
+        "borderRadius": 4
+      }
+    },
+    "screen": {
+      "content": {
+        "width": "100%",
+        "display": "flex",
+        "flexDirection": "column",
+        "alignItems": "center"
+      }
+    },
+    "hidden": {
+      "content": {
+        "display": "none"
+      }
+    },
+    "heading": {
+      "content": {
+        "fontSize": "4.5",
+        "fontWeight": "bold",
+        "color": "#3b82f6",
+        "textAlign": "center",
+        "marginBottom": "1"
+      }
+    },
+    "sub-heading": {
+      "content": {
+        "fontSize": "2.2",
+        "color": "#9ca3af",
+        "textAlign": "center",
+        "marginTop": "0.5",
+        "marginBottom": "2"
+      }
+    },
+    "btn": {
+      "content": {
+        "width": "80%",
+        "padding": "1.5",
+        "backgroundColor": "#3b82f6",
+        "color": "#ffffff",
+        "borderRadius": 2,
+        "borderWidth": "0.1",
+        "borderColor": "#2563eb",
+        "fontSize": "2.5",
+        "fontWeight": "medium",
+        "textAlign": "center",
+        "cursor": "pointer",
+        "marginTop": "1.5"
+      }
+    },
+    "btn-restart": {
+      "content": {
+        "backgroundColor": "#ef4444",
+        "borderColor": "#dc2626"
+      }
+    }
+  },
+  "ranges": {
+    "panel-container": {
+      "start": {
+        "line": 2,
+        "column": 2
+      },
+      "end": {
+        "line": 2,
+        "column": 18
+      }
+    },
+    "card-screen": {
+      "start": {
+        "line": 11,
+        "column": 2
+      },
+      "end": {
+        "line": 11,
+        "column": 14
+      }
+    },
+    "screen": {
+      "start": {
+        "line": 23,
+        "column": 2
+      },
+      "end": {
+        "line": 23,
+        "column": 9
+      }
+    },
+    "hidden": {
+      "start": {
+        "line": 30,
+        "column": 2
+      },
+      "end": {
+        "line": 30,
+        "column": 9
+      }
+    },
+    "heading": {
+      "start": {
+        "line": 34,
+        "column": 2
+      },
+      "end": {
+        "line": 34,
+        "column": 10
+      }
+    },
+    "sub-heading": {
+      "start": {
+        "line": 42,
+        "column": 2
+      },
+      "end": {
+        "line": 42,
+        "column": 14
+      }
+    },
+    "btn": {
+      "start": {
+        "line": 50,
+        "column": 2
+      },
+      "end": {
+        "line": 50,
+        "column": 6
+      }
+    },
+    "btn-restart": {
+      "start": {
+        "line": 65,
+        "column": 2
+      },
+      "end": {
+        "line": 65,
+        "column": 14
+      }
+    },
+    "uid-1": {
+      "start": {
+        "line": 71,
+        "column": 0
+      },
+      "end": {
+        "line": 89,
+        "column": 6
+      }
+    },
+    "uid-2": {
+      "start": {
+        "line": 73,
+        "column": 2
+      },
+      "end": {
+        "line": 79,
+        "column": 8
+      }
+    },
+    "uid-3": {
+      "start": {
+        "line": 74,
+        "column": 4
+      },
+      "end": {
+        "line": 78,
+        "column": 10
+      }
+    },
+    "uid-4": {
+      "start": {
+        "line": 75,
+        "column": 6
+      },
+      "end": {
+        "line": 75,
+        "column": 54
+      }
+    },
+    "uid-5": {
+      "start": {
+        "line": 76,
+        "column": 6
+      },
+      "end": {
+        "line": 76,
+        "column": 193
+      }
+    },
+    "uid-6": {
+      "start": {
+        "line": 77,
+        "column": 6
+      },
+      "end": {
+        "line": 77,
+        "column": 66
+      }
+    },
+    "uid-7": {
+      "start": {
+        "line": 82,
+        "column": 2
+      },
+      "end": {
+        "line": 88,
+        "column": 8
+      }
+    },
+    "uid-8": {
+      "start": {
+        "line": 83,
+        "column": 4
+      },
+      "end": {
+        "line": 87,
+        "column": 10
+      }
+    },
+    "uid-9": {
+      "start": {
+        "line": 84,
+        "column": 6
+      },
+      "end": {
+        "line": 84,
+        "column": 73
+      }
+    },
+    "uid-10": {
+      "start": {
+        "line": 85,
+        "column": 6
+      },
+      "end": {
+        "line": 85,
+        "column": 80
+      }
+    },
+    "uid-11": {
+      "start": {
+        "line": 86,
+        "column": 6
+      },
+      "end": {
+        "line": 86,
+        "column": 81
+      }
+    }
+  }
+}
