@@ -222,7 +222,7 @@ export class PortalSystem extends createSystem({
         panelEntity.object3D.position.set(0, 1.3, -1.8);
         panelEntity.object3D.rotation.set(0, 0, 0);
       } else if (config.includes('game_hud')) {
-        panelEntity.object3D.position.set(0, 2.15, -1.8);
+        panelEntity.object3D.position.set(0, 2.5, -1.8);
         panelEntity.object3D.rotation.set(0, 0, 0);
       }
     });
@@ -335,10 +335,10 @@ export class PortalSystem extends createSystem({
         portalObj.getWorldQuaternion(portalQuat);
 
         if (config.includes('game_hud')) {
-          // El HUD se posiciona exactamente a y = 0.85m local del portal (su borde superior es y = 1.0m, alineándose perfecto)
+          // El HUD se posiciona exactamente a y = 1.2m local del portal (el portal tiene radio 1.0m, dejando un espacio libre vertical de 0.1m)
           // Ligeramente hacia adelante (+0.02m) para evitar z-fighting
           const hudPos = portalPos.clone().add(
-            new Vector3(0, 0.85, 0.02).applyQuaternion(portalQuat)
+            new Vector3(0, 1.2, 0.02).applyQuaternion(portalQuat)
           );
           panelEntity.object3D.position.copy(hudPos);
           panelEntity.object3D.quaternion.copy(portalQuat);

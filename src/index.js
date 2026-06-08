@@ -94,11 +94,11 @@ World.create(document.getElementById('scene-container'), {
     .createTransformEntity()
     .addComponent(PanelUI, {
       config: './ui/game_hud.json',
-      maxHeight: 0.3,
+      maxHeight: 0.2,
       maxWidth: 4.0
     });
 
-  hudEntity.object3D.position.set(0, 2.15, -1.8); // 1.3 + 0.85 = 2.15m de altura por defecto
+  hudEntity.object3D.position.set(0, 2.5, -1.8); // 1.3 + 1.2 = 2.5m de altura por defecto
   hudEntity.object3D.rotation.set(0, 0, 0);
 
   // 3. Registrar todos los sistemas de juego en el ECS
