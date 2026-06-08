@@ -13,6 +13,8 @@ export class DroneSystem extends createSystem({
   init() {
     this.tempVec1 = new Vector3();
     this.tempVec2 = new Vector3();
+    this.rightVec = new Vector3();
+    this.upVec = new Vector3(0, 1, 0);
   }
 
   cleanupDrones() {
@@ -21,7 +23,7 @@ export class DroneSystem extends createSystem({
     });
   }
 
-  update(delta) {
+  update(delta, time) {
     let playing = false;
     let gmEntity = null;
 
@@ -52,8 +54,18 @@ export class DroneSystem extends createSystem({
       const speed = droneEntity.getValue(Drone, 'speed');
       const damage = droneEntity.getValue(Drone, 'damage');
 
-      // Mover el drone hacia la cabeza
+      // Oscilación senoidal desincronizada usando el ID de la entidad
+      const phase = (droneObj.id * 17.3) % 100;
+      const frequency = 3.0; // velocidad de la onda
+      const amplitude = 0.8; // amplitud de la onda
+      const wobbleSpeed = Math.cos(time * frequency + phase) * amplitude;
+
+      // Calcular vector horizontal perpendicular a la dirección del drone
+      this.rightVec.crossVectors(dir, this.upVec).normalize();
+
+      // Mover el drone hacia la cabeza con wobble lateral
       droneObj.position.addScaledVector(dir, speed * delta);
+      droneObj.position.addScaledVector(this.rightVec, wobbleSpeed * delta);
       
       // Rotar suavemente hacia el jugador
       droneObj.lookAt(this.tempVec1);

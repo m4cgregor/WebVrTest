@@ -110,19 +110,9 @@ export class PortalSystem extends createSystem({
       new TorusGeometry(1.0, 0.08, 12, 32),
       new MeshBasicMaterial({ color: 0x3b82f6 })
     );
-
-    // 2. Disco de energía traslúcido (radio 0.98m, altura 0.02m)
-    const disc = new Mesh(
-      new CylinderGeometry(0.98, 0.98, 0.02, 16),
-      new MeshBasicMaterial({ color: 0x1d4ed8, transparent: true, opacity: 0.5 })
-    );
-    disc.rotateX(Math.PI / 2);
-    disc.name = 'energyDisc';
-
     portalGroup.add(ring);
-    portalGroup.add(disc);
 
-    // 3. Túnel 3D del espacio (Tubo de radio 0.98m, 4 metros de profundidad)
+    // 2. Túnel 3D del espacio (Tubo de radio 0.98m, 4 metros de profundidad)
     // side: 1 equivale a BackSide para renderizar el interior del cilindro
     const tunnel = new Mesh(
       new CylinderGeometry(0.98, 0.98, 4.0, 16, 1, true),
@@ -132,7 +122,7 @@ export class PortalSystem extends createSystem({
     tunnel.position.set(0, 0, -2.0); // Centrado a 2.0m detrás del portal
     portalGroup.add(tunnel);
 
-    // 4. Anillos luminosos de profundidad dentro del túnel (efecto de paralaje 3D)
+    // 3. Anillos luminosos de profundidad dentro del túnel (efecto de paralaje 3D)
     const ringColors = [0x3b82f6, 0x8b5cf6, 0x06b6d4];
     for (let i = 0; i < 3; i++) {
       const depthRing = new Mesh(
@@ -141,6 +131,7 @@ export class PortalSystem extends createSystem({
       );
       // Colocar a profundidades de 1.0m, 2.0m y 3.0m
       depthRing.position.set(0, 0, -1.0 * (i + 1));
+      depthRing.name = `depthRing_${i}`;
       portalGroup.add(depthRing);
     }
 
@@ -203,7 +194,7 @@ export class PortalSystem extends createSystem({
 
     const droneEntity = this.world.createTransformEntity(droneGroup);
     droneEntity.addComponent(Drone, {
-      speed: 0.4 + Math.random() * 0.3,
+      speed: 0.6 + Math.random() * 0.45,
       damage: 20
     });
   }
@@ -374,10 +365,12 @@ export class PortalSystem extends createSystem({
 
       portalEntity.setValue(Portal, 'spawnTimer', timer);
       
-      // Animación suave de rotación del disco de energía
-      const disc = portalEntity.object3D.getObjectByName('energyDisc');
-      if (disc) {
-        disc.rotateY(delta * 0.5); // El disco gira sobre su eje de simetría
+      // Animación suave de rotación de los anillos del túnel en direcciones alternas
+      for (let i = 0; i < 3; i++) {
+        const depthRing = portalEntity.object3D.getObjectByName(`depthRing_${i}`);
+        if (depthRing) {
+          depthRing.rotateZ(delta * (0.3 * (i + 1) * (i % 2 === 0 ? 1 : -1)));
+        }
       }
     });
   }

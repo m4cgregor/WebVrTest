@@ -28,10 +28,12 @@
     padding-right: 0;
   }
 
-  /* Cada tarjeta mide 0.2m x 0.2m. En un panel de 4.0m x 0.2m, la tarjeta toma 5% de ancho y 100% de alto */
+  /* Cada tarjeta mide 0.26m x 0.2m. En un panel de 4.0m x 0.2m, la tarjeta toma 6.5% de ancho y 100% de alto */
   .hud-card {
-    width: 5%;
+    width: 6.5%;
     height: 100%;
+    padding-left: 1.5;
+    padding-right: 1.5;
     background-color: #0b0f19;
     border-color: #1f2937;
     border-width: 0.15;
