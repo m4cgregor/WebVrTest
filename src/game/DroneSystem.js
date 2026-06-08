@@ -15,6 +15,7 @@ export class DroneSystem extends createSystem({
     this.tempVec2 = new Vector3();
     this.rightVec = new Vector3();
     this.upVec = new Vector3(0, 1, 0);
+    this.dirVec = new Vector3();
   }
 
   cleanupDrones() {
@@ -47,7 +48,7 @@ export class DroneSystem extends createSystem({
       droneObj.getWorldPosition(this.tempVec2);
 
       // Calcular dirección hacia el jugador
-      const dir = new Vector3().subVectors(this.tempVec1, this.tempVec2);
+      const dir = this.dirVec.subVectors(this.tempVec1, this.tempVec2);
       const distance = dir.length();
       dir.normalize();
 
