@@ -76,8 +76,8 @@ World.create(document.getElementById('scene-container'), {
     .createTransformEntity()
     .addComponent(PanelUI, {
       config: './ui/game_hud.json',
-      maxHeight: 0.6,
-      maxWidth: 3.6
+      maxHeight: 2.0,
+      maxWidth: 4.0
     })
     .addComponent(Interactable)
     .addComponent(ScreenSpace, {

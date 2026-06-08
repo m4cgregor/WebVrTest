@@ -1,16 +1,18 @@
 <style>
-  /* El contenedor principal es transparente y abarca todo el ancho del panel */
+  /* El contenedor principal es transparente y abarca todo el ancho y alto del panel (4x2m) */
   .panel-container {
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     background-color: transparent;
   }
 
   /* Las pantallas de inicio y fin (Welcome / Game Over) tienen fondo sólido y bordes */
   .card-screen {
-    width: 25; /* 25% de 3.6m = 0.9m (ancho original perfecto) */
+    width: 25; /* 25% de 4.0m = 1.0m de ancho */
     align-items: center;
     padding: 3;
     display: flex;
@@ -23,9 +25,21 @@
 
   .screen {
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+  }
+
+  /* El HUD se alinea arriba para quedar en la esquina superior */
+  .hud-screen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
   }
 
   .hidden {
@@ -54,14 +68,14 @@
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
-    padding-left: 5;
-    padding-right: 5;
+    padding-left: 0;
+    padding-right: 0;
   }
 
-  /* Cada bloque individual del HUD (Score y Life) es una pequeña tarjeta sólida */
+  /* Cada bloque individual del HUD (Score y Life) mide 0.3m x 0.3m (8% ancho, 15% alto del panel 4x2m) */
   .hud-card {
-    width: 22; /* Más pequeño para separar del portal */
-    padding: 2;
+    width: 8%;
+    height: 15%;
     background-color: #0b0f19;
     border-color: #1f2937;
     border-width: 0.15;
@@ -70,8 +84,9 @@
     justify-content: center;
   }
 
+  /* Reducimos el tamaño de la fuente para que quepa perfectamente en los 0.3m de la tarjeta */
   .hud-item {
-    font-size: 3.5;
+    font-size: 2.2;
     font-weight: bold;
     color: #f3f4f6;
     text-align: center;
@@ -109,7 +124,7 @@
   </div>
 
   <!-- HUD SCREEN (DIVIDIDO A LA IZQUIERDA Y DERECHA) -->
-  <div id="hud-screen" class="screen hidden">
+  <div id="hud-screen" class="hud-screen hidden">
     <div class="hud-split-container">
       <!-- Bloque Izquierdo: Puntos -->
       <div class="hud-card">

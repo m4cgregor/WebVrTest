@@ -13,7 +13,8 @@ import {
   BufferGeometry,
   BufferAttribute,
   Points,
-  PointsMaterial
+  PointsMaterial,
+  CircleGeometry
 } from '@iwsdk/core';
 import { GameManager, Portal, Drone } from './components.js';
 
@@ -104,15 +105,15 @@ export class PortalSystem extends createSystem({
   spawnPortalAt(position, quaternion) {
     const portalGroup = new Group();
 
-    // 1. Aro exterior del portal (Más grande: radio 0.8m, tubo 0.08m)
+    // 1. Aro exterior del portal (2.0m de diámetro: radio 1.0m, tubo 0.08m)
     const ring = new Mesh(
-      new TorusGeometry(0.8, 0.08, 12, 32),
+      new TorusGeometry(1.0, 0.08, 12, 32),
       new MeshBasicMaterial({ color: 0x3b82f6 })
     );
 
-    // 2. Disco de energía traslúcido (radio 0.78m, altura 0.02m)
+    // 2. Disco de energía traslúcido (radio 0.98m, altura 0.02m)
     const disc = new Mesh(
-      new CylinderGeometry(0.78, 0.78, 0.02, 16),
+      new CylinderGeometry(0.98, 0.98, 0.02, 16),
       new MeshBasicMaterial({ color: 0x1d4ed8, transparent: true, opacity: 0.5 })
     );
     disc.rotateX(Math.PI / 2);
@@ -121,10 +122,10 @@ export class PortalSystem extends createSystem({
     portalGroup.add(ring);
     portalGroup.add(disc);
 
-    // 3. Túnel 3D del espacio (Tubo que se extiende hacia adentro de la pared, 4 metros de profundidad)
+    // 3. Túnel 3D del espacio (Tubo de radio 0.98m, 4 metros de profundidad)
     // side: 1 equivale a BackSide para renderizar el interior del cilindro
     const tunnel = new Mesh(
-      new CylinderGeometry(0.78, 0.78, 4.0, 16, 1, true),
+      new CylinderGeometry(0.98, 0.98, 4.0, 16, 1, true),
       new MeshBasicMaterial({ color: 0x070a13, side: 1 })
     );
     tunnel.rotateX(Math.PI / 2);
@@ -135,7 +136,7 @@ export class PortalSystem extends createSystem({
     const ringColors = [0x3b82f6, 0x8b5cf6, 0x06b6d4];
     for (let i = 0; i < 3; i++) {
       const depthRing = new Mesh(
-        new TorusGeometry(0.76, 0.02, 8, 24),
+        new TorusGeometry(0.96, 0.02, 8, 24),
         new MeshBasicMaterial({ color: ringColors[i] })
       );
       // Colocar a profundidades de 1.0m, 2.0m y 3.0m
@@ -143,24 +144,31 @@ export class PortalSystem extends createSystem({
       portalGroup.add(depthRing);
     }
 
-    // 5. Campo de estrellas (starfield) dentro del túnel (Estrellas 3D con atenuación de tamaño)
+    // 5. Tapa de fondo negro absoluto a 4m de profundidad (detrás de las estrellas)
+    const bottomCap = new Mesh(
+      new CircleGeometry(0.98, 16),
+      new MeshBasicMaterial({ color: 0x000000 })
+    );
+    bottomCap.position.set(0, 0, -4.0);
+    portalGroup.add(bottomCap);
+
+    // 6. Campo de estrellas en el FONDO del túnel (plano 2D a z = -3.9m, sin estar flotando dentro del túnel)
     const starsGeometry = new BufferGeometry();
-    const starsCount = 100;
+    const starsCount = 120;
     const positions = new Float32Array(starsCount * 3);
     for (let i = 0; i < starsCount; i++) {
       const theta = Math.random() * Math.PI * 2;
-      const r = Math.random() * 0.76;
+      const r = Math.random() * 0.96;
       positions[i * 3] = Math.cos(theta) * r;
       positions[i * 3 + 1] = Math.sin(theta) * r;
-      positions[i * 3 + 2] = -Math.random() * 4.0;
+      positions[i * 3 + 2] = -3.9; // Justo delante de la tapa negra del fondo
     }
     starsGeometry.setAttribute('position', new BufferAttribute(positions, 3));
     const starsMaterial = new PointsMaterial({
       color: 0xffffff,
-      size: 0.03,
+      size: 0.025,
       transparent: true,
-      opacity: 0.9,
-      sizeAttenuation: true
+      opacity: 0.95
     });
     const starfield = new Points(starsGeometry, starsMaterial);
     portalGroup.add(starfield);
@@ -318,9 +326,9 @@ export class PortalSystem extends createSystem({
         portalObj.getWorldPosition(portalPos);
         portalObj.getWorldQuaternion(portalQuat);
 
-        // Posicionado arriba (+0.8m) y centrado con el portal, ligeramente hacia adelante (+0.02m) para evitar z-fighting
+        // Centrado exactamente con el portal, ligeramente hacia adelante (+0.02m) para evitar z-fighting
         const hudPos = portalPos.clone().add(
-          new Vector3(0, 0.8, 0.02).applyQuaternion(portalQuat)
+          new Vector3(0, 0, 0.02).applyQuaternion(portalQuat)
         );
         hudEntity.object3D.position.copy(hudPos);
         hudEntity.object3D.quaternion.copy(portalQuat);
