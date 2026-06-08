@@ -32,12 +32,10 @@
   .hud-card {
     width: 6.5%;
     height: 100%;
-    padding-left: 1.5;
-    padding-right: 1.5;
+    padding: 1.5;
     background-color: #0b0f19;
     border-color: #1f2937;
     border-width: 0.15;
-    border-radius: 3;
     align-items: center;
     justify-content: center;
   }

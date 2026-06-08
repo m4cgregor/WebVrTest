@@ -174,22 +174,28 @@ export class PortalSystem extends createSystem({
   spawnDroneAt(position) {
     const droneGroup = new Group();
 
-    // Cuerpo esférico del drone
+    // Crear pirámide de proporción 1x1x2 (base cuadrada de lado ~0.12m, altura 0.24m)
+    // El radio circunscrito para lado 0.12m es 0.12 / sqrt(2) ≈ 0.085m
+    const pyramidGeom = new CylinderGeometry(0, 0.085, 0.24, 4);
+    pyramidGeom.rotateY(Math.PI / 4); // Alinear caras con los ejes local X/Y
+    pyramidGeom.rotateX(-Math.PI / 2); // Orientar el vértice (+Y original) hacia el frente (-Z)
+
     const body = new Mesh(
-      new TorusGeometry(0.12, 0.03, 8, 24),
+      pyramidGeom,
       new MeshBasicMaterial({ color: 0xef4444 })
     );
 
-    // Ojo luminoso central
-    const eye = new Mesh(
-      new CylinderGeometry(0.04, 0.04, 0.05, 12),
+    // Pequeño booster/motor brillante amarillo en la parte trasera (z = 0.13m)
+    const thrusterGeom = new CylinderGeometry(0.02, 0.03, 0.04, 8);
+    thrusterGeom.rotateX(Math.PI / 2); // Alinear cilindro con el eje Z
+    const thruster = new Mesh(
+      thrusterGeom,
       new MeshBasicMaterial({ color: 0xffeb3b })
     );
-    eye.rotateX(Math.PI / 2);
-    eye.position.set(0, 0, 0.08);
+    thruster.position.set(0, 0, 0.13);
 
     droneGroup.add(body);
-    droneGroup.add(eye);
+    droneGroup.add(thruster);
     droneGroup.position.copy(position);
 
     const droneEntity = this.world.createTransformEntity(droneGroup);

@@ -18,7 +18,6 @@
     background-color: #0b0f19;
     border-color: #1f2937;
     border-width: 0.2;
-    border-radius: 4;
   }
 
   .screen {
@@ -53,7 +52,6 @@
     padding: 1.5;
     background-color: #3b82f6;
     color: #ffffff;
-    border-radius: 2;
     border-width: 0.1;
     border-color: #2563eb;
     font-size: 2.5;
