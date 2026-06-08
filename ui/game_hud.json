@@ -112,7 +112,7 @@
     },
     "hud-card": {
       "content": {
-        "width": "7.5%",
+        "width": "5%",
         "height": "100%",
         "backgroundColor": "#0b0f19",
         "borderColor": "#1f2937",
@@ -124,7 +124,7 @@
     },
     "hud-item": {
       "content": {
-        "fontSize": "2.2",
+        "fontSize": "1.6",
         "fontWeight": "bold",
         "color": "#f3f4f6",
         "textAlign": "center"
