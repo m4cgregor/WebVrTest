@@ -71,13 +71,13 @@ World.create(document.getElementById('scene-container'), {
     playbackMode: PlaybackMode.FadeRestart
   });
 
-  // 2. Crear la interfaz espacial HUD flotante (game_hud.json compilado)
-  const hudEntity = world
+  // 2a. Crear el menú interactivo del juego (bienvenida y fin de partida)
+  const menuEntity = world
     .createTransformEntity()
     .addComponent(PanelUI, {
-      config: './ui/game_hud.json',
-      maxHeight: 2.0,
-      maxWidth: 4.0
+      config: './ui/game_menu.json',
+      maxHeight: 0.6,
+      maxWidth: 0.9
     })
     .addComponent(Interactable)
     .addComponent(ScreenSpace, {
@@ -86,8 +86,19 @@ World.create(document.getElementById('scene-container'), {
       height: '40%'
     });
 
-  // Colocar el HUD centrado y a altura de los ojos por defecto
-  hudEntity.object3D.position.set(0, 1.3, -1.8);
+  menuEntity.object3D.position.set(0, 1.3, -1.8);
+  menuEntity.object3D.rotation.set(0, 0, 0);
+
+  // 2b. Crear la UI del HUD (puntos y vida, no interactiva para no tapar el gameplay)
+  const hudEntity = world
+    .createTransformEntity()
+    .addComponent(PanelUI, {
+      config: './ui/game_hud.json',
+      maxHeight: 0.3,
+      maxWidth: 4.0
+    });
+
+  hudEntity.object3D.position.set(0, 2.15, -1.8); // 1.3 + 0.85 = 2.15m de altura por defecto
   hudEntity.object3D.rotation.set(0, 0, 0);
 
   // 3. Registrar todos los sistemas de juego en el ECS

@@ -215,10 +215,16 @@ export class PortalSystem extends createSystem({
     this.sessionPortalsInitialized = false;
     this.fallbackSpawned = false;
 
-    // Retornar el HUD al centro de la vista al terminar la partida o ir a la bienvenida
-    this.queries.hudPanel.entities.forEach((hudEntity) => {
-      hudEntity.object3D.position.set(0, 1.3, -1.8);
-      hudEntity.object3D.rotation.set(0, 0, 0);
+    // Retornar los paneles a sus posiciones iniciales por defecto
+    this.queries.hudPanel.entities.forEach((panelEntity) => {
+      const config = panelEntity.getValue(PanelUI, 'config');
+      if (config.includes('game_menu')) {
+        panelEntity.object3D.position.set(0, 1.3, -1.8);
+        panelEntity.object3D.rotation.set(0, 0, 0);
+      } else if (config.includes('game_hud')) {
+        panelEntity.object3D.position.set(0, 2.15, -1.8);
+        panelEntity.object3D.rotation.set(0, 0, 0);
+      }
     });
   }
 
@@ -314,9 +320,11 @@ export class PortalSystem extends createSystem({
       }
     }
 
-    // Mantener el HUD perfectamente alineado y coplanar al portal activo (los extremos de la UI quedarán a izquierda y derecha)
+    // Mantener el HUD perfectamente alineado al portal activo, y ocultar el menú interactivo
     this.queries.portals.entities.forEach((portalEntity) => {
-      this.queries.hudPanel.entities.forEach((hudEntity) => {
+      this.queries.hudPanel.entities.forEach((panelEntity) => {
+        const config = panelEntity.getValue(PanelUI, 'config');
+        
         // Forzar actualización de matrices en Three.js para obtener las transformadas de mundo exactas
         portalEntity.object3D.updateMatrixWorld(true);
         
@@ -326,12 +334,18 @@ export class PortalSystem extends createSystem({
         portalObj.getWorldPosition(portalPos);
         portalObj.getWorldQuaternion(portalQuat);
 
-        // Centrado exactamente con el portal, ligeramente hacia adelante (+0.02m) para evitar z-fighting
-        const hudPos = portalPos.clone().add(
-          new Vector3(0, 0, 0.02).applyQuaternion(portalQuat)
-        );
-        hudEntity.object3D.position.copy(hudPos);
-        hudEntity.object3D.quaternion.copy(portalQuat);
+        if (config.includes('game_hud')) {
+          // El HUD se posiciona exactamente a y = 0.85m local del portal (su borde superior es y = 1.0m, alineándose perfecto)
+          // Ligeramente hacia adelante (+0.02m) para evitar z-fighting
+          const hudPos = portalPos.clone().add(
+            new Vector3(0, 0.85, 0.02).applyQuaternion(portalQuat)
+          );
+          panelEntity.object3D.position.copy(hudPos);
+          panelEntity.object3D.quaternion.copy(portalQuat);
+        } else if (config.includes('game_menu')) {
+          // El menú se esconde enviándolo muy abajo mientras jugamos para que no tape nada
+          panelEntity.object3D.position.set(0, -10, 0);
+        }
       });
     });
 

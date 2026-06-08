@@ -9,27 +9,24 @@ import { GameManager } from './components.js';
 
 export class GameManagerSystem extends createSystem({
   gameManager: { required: [GameManager] },
-  hudPanel: {
-    required: [PanelUI, PanelDocument],
-    where: [eq(PanelUI, 'config', './ui/game_hud.json')]
-  }
+  panels: { required: [PanelUI, PanelDocument] }
 }) {
   init() {
     this.doc = null;
+    this.menuDoc = null;
+    this.hudDoc = null;
     this.eventsBound = false;
   }
 
-  bindUIEvents(doc) {
+  bindUIEvents() {
     if (this.eventsBound) return;
     this.eventsBound = true;
-    console.log('[GameManagerSystem] bindUIEvents called! Available IDs in doc:', Array.from(doc.elementMap.keys()));
 
-    const startBtn = doc.getElementById('start-button');
-    const restartBtn = doc.getElementById('restart-button');
+    const startBtn = this.doc.menu.getElementById('start-button');
+    const restartBtn = this.doc.menu.getElementById('restart-button');
 
     if (startBtn) {
       startBtn.name = 'start-button';
-      console.log('[GameManagerSystem] startBtn UUID:', startBtn.uuid);
       startBtn.addEventListener('click', () => {
         console.log('[GameManagerSystem] Start button clicked!');
         this.startGame();
@@ -82,22 +79,19 @@ export class GameManagerSystem extends createSystem({
       const score = gmEntity.getValue(GameManager, 'score');
       const life = gmEntity.getValue(GameManager, 'life');
 
-      const welcomeScreen = this.doc.getElementById('welcome-screen');
-      const hudScreen = this.doc.getElementById('hud-screen');
-      const gameOverScreen = this.doc.getElementById('game-over-screen');
-      const scoreText = this.doc.getElementById('score-text');
-      const lifeText = this.doc.getElementById('life-text');
-      const finalScoreText = this.doc.getElementById('final-score-text');
+      const welcomeScreen = this.doc.menu.getElementById('welcome-screen');
+      const gameOverScreen = this.doc.menu.getElementById('game-over-screen');
+      const scoreText = this.doc.hud.getElementById('score-text');
+      const lifeText = this.doc.hud.getElementById('life-text');
+      const finalScoreText = this.doc.menu.getElementById('final-score-text');
 
       if (state === 0) {
         // Welcome Screen
         welcomeScreen?.setProperties({ display: 'flex' });
-        hudScreen?.setProperties({ display: 'none' });
         gameOverScreen?.setProperties({ display: 'none' });
       } else if (state === 1) {
         // Playing
         welcomeScreen?.setProperties({ display: 'none' });
-        hudScreen?.setProperties({ display: 'flex' });
         gameOverScreen?.setProperties({ display: 'none' });
 
         if (scoreText) {
@@ -114,7 +108,6 @@ export class GameManagerSystem extends createSystem({
       } else if (state === 2) {
         // Game Over
         welcomeScreen?.setProperties({ display: 'none' });
-        hudScreen?.setProperties({ display: 'none' });
         gameOverScreen?.setProperties({ display: 'flex' });
 
         if (finalScoreText) {
@@ -125,15 +118,26 @@ export class GameManagerSystem extends createSystem({
   }
 
   update() {
-    // Si la UI aún no ha cargado, intentamos resolver el documento dinámicamente
+    // Si la UI aún no ha cargado, intentamos resolver los documentos dinámicamente
     if (!this.doc) {
-      this.queries.hudPanel.entities.forEach((panelEntity) => {
+      this.queries.panels.entities.forEach((panelEntity) => {
+        const config = panelEntity.getValue(PanelUI, 'config');
         const doc = panelEntity.getValue(PanelDocument, 'document');
         if (doc) {
-          this.doc = doc;
-          this.bindUIEvents(doc);
+          if (config.includes('game_menu')) {
+            this.menuDoc = doc;
+          } else if (config.includes('game_hud')) {
+            this.hudDoc = doc;
+          }
         }
       });
+      if (this.menuDoc && this.hudDoc) {
+        this.doc = {
+          menu: this.menuDoc,
+          hud: this.hudDoc
+        };
+        this.bindUIEvents();
+      }
     }
 
     // Mantener la UI actualizada en cada frame si estamos jugando
